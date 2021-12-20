@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, create_engine
+from sqlalchemy import Column, String, Integer, create_engine, exc
 from sqlalchemy.dialects.postgresql import ARRAY
 from flask_sqlalchemy import SQLAlchemy
 from flask import jsonify
@@ -39,20 +39,19 @@ def get_query(q):
 class Foods(db.Model):
     __tablename__ = "foods"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(64), unique=True, nullable=False)
-    taste = Column(Integer, nullable=False)
     
-    def __init__(self, name, taste):
+    def __init__(self, id, name):
+        self.id = id
         self.name = name
-        self.taste = taste
 
     def insert(self):
         try:
             db.session.add(self)
             db.session.commit()
-        except:
-            print(tag+"Cannot insert data.")
+        except exc.SQLAlchemyError as e: 
+            print(tag+"Cannot insert data."+e)
 
     def update(self):
         db.session.commit()
@@ -61,21 +60,20 @@ class Foods(db.Model):
         try:
             db.session.delete(self)
             db.session.commit()
-        except:
-            print(tag+"Cannot delete data.")
+        except exc.SQLAlchemyError as e: 
+            print(tag+"Cannot delete data."+e)
     
     def format(self):
         return {
             "id": self.id,
             "name": self.name,
-            "taste": self.taste
         }
 
 
 class Records(db.Model):
     __tablename__ = "records"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True)
     before = Column(String(64), nullable=False)
     now = Column(String(64), nullable=False)
     
@@ -85,15 +83,21 @@ class Records(db.Model):
         self.now = now
 
     def insert(self):
-        db.session.add(self)
-        db.session.commit()
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except exc.SQLAlchemyError as e: 
+            print(tag+"Cannot insert data."+e)
 
     def update(self):
         db.session.commit()
 
     def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except exc.SQLAlchemyError as e: 
+            print(tag+"Cannot insert data."+e)
         
     def format(self):
         return {
