@@ -1,2 +1,6 @@
-/__pycache__
-.csv
+
+# ignore cache folder
+__pycache__/
+
+# ignore csv database
+*.csv

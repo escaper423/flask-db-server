@@ -39,7 +39,7 @@ def get_query(q):
 class Foods(db.Model):
     __tablename__ = "foods"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True )
     name = Column(String(64), unique=True, nullable=False)
     
     def __init__(self, id, name):
@@ -73,12 +73,11 @@ class Foods(db.Model):
 class Records(db.Model):
     __tablename__ = "records"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     before = Column(String(64), nullable=False)
     now = Column(String(64), nullable=False)
     
-    def __init__(self, id, before, now):
-        self.id = id
+    def __init__(self, before, now):
         self.before = before
         self.now = now
 
