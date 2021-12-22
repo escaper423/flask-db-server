@@ -28,19 +28,29 @@ def troll():
 
 @app.route('/query')
 def dispatch_query():
-    output = get_query("SELECT {} from foods;".format())
+    output = get_query("SELECT * from foods;")
     return jsonify(output)
 
-@app.route('/record', methods=['GET','PUT'])
+@app.route('/record', methods=['GET','POST'])
 def add_record():
-    bf = request.args.get('before','')
-    now = request.args.get('now','')
-    
-    to_add = Records(bf,now)
-    to_add.insert()
+    if request.method == 'POST':
+        print(tag+"Adding Record...")
+        bf = request.args.get('before','')
+        now = request.args.get('now','')
+        print("bf: {}, now: {}".format(bf,now))
+
+        to_add = Records(bf,now)
+        to_add.insert()
+        response = app.response_class(status=200)
+        return response
+    else:
+        print(tag+"Getting Record...")
+        return app.response_class(status=200)
+
     
 @app.errorhandler(404)
 def not_found(err):
+    return "1"
 
 
 
