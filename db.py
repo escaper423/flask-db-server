@@ -28,14 +28,6 @@ def setup_db(app, db_path=db_path):
     db.create_all()
     print(tag+"Setup Completed.")
 
-def get_query(q):
-        raw_output = db.session.execute(q).fetchall()
-        output = []
-        for r in raw_output:
-            data = jsonify(id=r['id'], name=r['name'], taste=r['taste'])
-            output.append(data.get_json())
-        return output
-
 class Foods(db.Model):
     __tablename__ = "foods"
 
@@ -62,13 +54,15 @@ class Foods(db.Model):
             db.session.commit()
         except exc.SQLAlchemyError as e: 
             print(tag+"Cannot delete data."+e)
-    
-    def format(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-        }
 
+    def get_query(q):
+        raw_output = db.session.execute(q).fetchall()
+        output = []
+        for r in raw_output:
+            data = jsonify(id=r['id'], name=r['name'])
+            output.append(data.get_json())
+        return output
+    
 
 class Records(db.Model):
     __tablename__ = "records"
@@ -91,6 +85,14 @@ class Records(db.Model):
     def update(self):
         db.session.commit()
 
+    def get_query(q):
+        raw_output = db.session.execute(q).fetchall()
+        output = []
+        for r in raw_output:
+            data = jsonify(name=r['now'], count=r['count'])
+            output.append(data.get_json())
+        return output
+
     def delete(self):
         try:
             db.session.delete(self)
@@ -98,9 +100,3 @@ class Records(db.Model):
         except exc.SQLAlchemyError as e: 
             print(tag+"Cannot insert data."+e)
         
-    def format(self):
-        return {
-            "id": self.id,
-            "before": self.before,
-            "now": self.now
-        }
