@@ -2,7 +2,11 @@ from sqlalchemy import Column, String, Integer, create_engine, exc
 from sqlalchemy.dialects.postgresql import ARRAY
 from flask_sqlalchemy import SQLAlchemy
 from flask import jsonify
+from bs4 import BeautifulSoup
+import requests
 import json
+import requests
+import os
 
 from sqlalchemy.sql.expression import null
 from sqlalchemy.sql.schema import ForeignKey
@@ -33,6 +37,7 @@ class Foods(db.Model):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True )
     name = Column(String(64), unique=True, nullable=False)
+    image_url = Column(String(256), unique=True, nullable=True)
     
     def __init__(self, id, name):
         self.id = id
@@ -40,10 +45,17 @@ class Foods(db.Model):
 
     def insert(self):
         try:
+            url = "https://www.google.com/search?q={}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwiX8JqToIL1AhVGeXAKHdz8CgkQ_AUoAnoECAMQBA&biw=1920&bih=937&dpr=1".format(self.name)
+            r = requests.get(url)
+            html = r.text
+            soup = BeautifulSoup(html, "html.parser")
+            links = soup.find_all('img', src=True, limit=2)
+            self.image_url = links[1].get('src')
+
             db.session.add(self)
             db.session.commit()
         except exc.SQLAlchemyError as e: 
-            print(tag+"Cannot insert data."+e)
+            print(tag+"Cannot insert data."+str(e))
 
     def update(self):
         db.session.commit()
@@ -53,7 +65,7 @@ class Foods(db.Model):
             db.session.delete(self)
             db.session.commit()
         except exc.SQLAlchemyError as e: 
-            print(tag+"Cannot delete data."+e)
+            print(tag+"Cannot delete data."+str(e))
 
     def get_query(q):
         raw_output = db.session.execute(q).fetchall()
@@ -62,6 +74,14 @@ class Foods(db.Model):
             data = jsonify(id=r['id'], name=r['name'])
             output.append(data.get_json())
         return output
+
+    def get_url(q):
+        result = db.session.execute(q).fetchone()
+        print(result)
+        return result['image_url']
+
+        
+
     
 
 class Records(db.Model):
@@ -80,7 +100,7 @@ class Records(db.Model):
             db.session.add(self)
             db.session.commit()
         except exc.SQLAlchemyError as e: 
-            print(tag+"Cannot insert data."+e)
+            print(tag+"Cannot insert data."+str(e))
 
     def update(self):
         db.session.commit()

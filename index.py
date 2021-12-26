@@ -61,6 +61,11 @@ def add_record():
         print(tag+"Getting Record...")
         return app.response_class(status=200)
 
+@app.route('/image', methods=['GET'])
+def get_image():
+    query = request.args.get('query','nothing')
+    img_url = Foods.get_url("SELECT image_url from foods where name='{}';".format(query))
+    return jsonify(img_url)
 
 @app.errorhandler(404)
 def not_found(err):
